@@ -9,104 +9,75 @@ import numpy as np
 from torch.utils.data import Dataset, DataLoader
 from torch_lr_finder import LRFinder
 
-class cifar_ds10(torchvision.datasets.CIFAR10):
-    def __init__(self, root="./data", train=True, download=True, transform=None):
-        super().__init__(root=root, train=train, download=download, transform=transform)
+# custom dataset class for albumentations library
+class AlbumentationImageDataset(Dataset):
+    def __init__(self, image_list, mean, std, train= True):
+        self.image_list = image_list
+        #RandomCrop 32, 32 (after padding of 4) >> FlipLR >> Followed by CutOut(8, 8)
+        self.aug = A.Compose({
+                    ToTensorV2(),
+                    A.Normalize((0.49139968, 0.48215841, 0.44653091), (0.24703223, 0.24348513, 0.26158784)),
+                    A.HorizontalFlip(),
+                    A.ShiftScaleRotate(),
+                    A.CoarseDropout(1, 16, 16, 1, 16, 16,fill_value=0.473363, mask_fill_value=None)
+            
+            #A.Normalize(mean, std),
+            #A.PadIfNeeded(min_height=40, min_width=40, always_apply=True),
+            #A.RandomCrop(width=32, height=32),
+            #A.HorizontalFlip(),
+            #A.Cutout(num_holes=1, max_h_size=8, max_w_size=8)
+            #A.CoarseDropout(max_holes=1,min_holes = 1, max_height=8, max_width=8, p=0.5,fill_value=np.mean(mean), min_height=8, min_width=8, mask_fill_value = None)          
+        })
 
-    def __getitem__(self, index):
-        image, label = self.data[index], self.targets[index]
+        self.norm = A.Compose({
+            ToTensorV2(),
+            A.Normalize((0.49139968, 0.48215841, 0.44653091), (0.24703223, 0.24348513, 0.26158784)),
+        })
+        self.train = train
+            
+    def __len__(self):
+        return (len(self.image_list))
 
-        if self.transform is not None:
-            transformed = self.transform(image=image)
-            image = transformed["image"]
-
-        return image, label
-
-def tl_ts_mod(transform_train,transform_valid,batch_size=512):
-    trainset = cifar_ds10(root='./data', train=True, download=True, transform=transform_train)
-    trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=2)
-    testset = cifar_ds10(root='./data', train=False, download=True, transform=transform_valid)
-    testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=False, num_workers=2)
-    return trainset,trainloader,testset,testloader
-  
-def set_albumen_params(mean, std):
-    horizontalflip_prob= 0.2
-    rotate_limit= 15
-    shiftscalerotate_prob= 0.25
-    num_holes= 1
-    cutout_prob= 0.5
-    max_height = 8
-    max_width = 8
-
-    transform_train = A.Compose(
-        [
-        #A.RandomCrop(height=16,width=16),
-        A.HorizontalFlip(p=horizontalflip_prob),
-        A.CoarseDropout(max_holes=num_holes,min_holes = 1, max_height=max_height, max_width=max_width, 
-        p=cutout_prob,fill_value=tuple([x * 255.0 for x in mean]),
-        min_height=max_height, min_width=max_width, mask_fill_value = None),
-        A.Normalize(mean = mean, std = std,p=1.0, always_apply = True),
-        ToTensorV2()
-        ])
-    
-    transform_valid = A.Compose(
-        [
-        A.Normalize(
-                mean=mean,
-                std=std,
-                p=1.0,
-                max_pixel_value=255,
-            ),
-        ToTensorV2()
-        ])
-    return transform_train, transform_valid 
-
-def load_data():
-    transform = transforms.Compose(
-      [transforms.ToTensor()])
-
-    trainset = torchvision.datasets.CIFAR10(root='./data', train=True,
-                                          download=True, transform=transform)
-    trainloader = torch.utils.data.DataLoader(trainset, batch_size=4,
-                                            shuffle=True, num_workers=2)
-
-    testset = torchvision.datasets.CIFAR10(root='./data', train=False,
-                                        download=True, transform=transform)
-    testloader = torch.utils.data.DataLoader(testset, batch_size=4,
-                                          shuffle=False, num_workers=2)
-    return trainloader, trainset  
-
-def show_sample(dataset):
-    classes = ['plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
+    def __getitem__(self, i):
         
-    dataiter = iter(dataset)
+        image, label = self.image_list[i]
+        
+        if self.train:
+            #apply augmentation only for training
+            image = self.aug(image=np.array(image))['image']
+        else:
+            image = self.norm(image=np.array(image))['image']
+        #image = np.transpose(image, (2, 0, 1)).astype(np.float32)
+        return torch.tensor(image, dtype=torch.float), label
+        #return image, label    
 
-    index = 0
-    fig = plt.figure(figsize=(20,10))
-    for i in range(10):
-        images, labels = next(dataiter)
-        actual = classes[labels]
-        image = images.squeeze().to('cpu').numpy()
-        ax = fig.add_subplot(2, 5, index+1)
-        index = index + 1
-        ax.axis('off')
-        ax.set_title(f'\n Label : {actual}',fontsize=10) 
-        ax.imshow(np.transpose(image, (1, 2, 0))) 
-        images, labels = next(dataiter) 
+def viz_data(exp, cols=8, rows=5):
+    figure = plt.figure(figsize=(14, 10))
+    for i in range(1, cols * rows + 1):
+        img, label = exp[i]
+
+        figure.add_subplot(rows, cols, i)
+        plt.title(exp.classes[label])
+        plt.axis("off")
+        plt.imshow(img, cmap="gray")
+
+    plt.tight_layout()
+    plt.show() 
     
 def process_dataset(batch_size=512,visualize = ''):
-    trl, trs = load_data()
-    
-    mean = list(np.round(trs.data.mean(axis=(0,1,2))/255., 4))
-    std = list(np.round(trs.data.std(axis=(0,1,2))/255.,4))
-        
-    transform_train, transform_valid = set_albumen_params(mean, std)
-    trainset_mod, trainloader_mod, testset_mod, testloader_mod = tl_ts_mod(transform_train,transform_valid,batch_size=batch_size)
+    trainset = datasets.CIFAR10(root='./data', train=True, download=True)
+    testset = datasets.CIFAR10(root='./data', train=False, download=True)
+
+    mean = np.mean(trainset.data, axis=(0,1,2)) / 255.
+    std = np.std(trainset.data, axis=(0,1,2)) / 255.
 
     if visualize == 'X':
-        show_sample(trs)
+        viz_data(trainset)
 
-    return trainset_mod, trainloader_mod, testset_mod, testloader_mod , mean, std 
+    trainloader = torch.utils.data.DataLoader(AlbumentationImageDataset(trainset,mean,std, train=True), batch_size=batch_size, shuffle=True, num_workers=2)
+    testloader = torch.utils.data.DataLoader(AlbumentationImageDataset(testset,mean,std, train=False), batch_size=batch_size, shuffle=False, num_workers=2)
+
+    return trainset,trainloader,testset,testloader , mean, std 
 
 
 def save_model(model, epoch, optimizer, path):
