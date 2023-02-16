@@ -13,13 +13,14 @@ from torch_lr_finder import LRFinder
 class AlbumentationImageDataset(Dataset):
     def __init__(self, image_list, mean, std, train= True):
         self.image_list = image_list
-
+        #RandomCrop 32, 32 (after padding of 4) >> FlipLR >> Followed by CutOut(8, 8)
         self.aug = A.Compose({
             A.Normalize(mean, std),
-            #A.PadIfNeeded(min_height=40, min_width=40, always_apply=True),
-            #A.RandomCrop(width=32, height=32),
-            A.HorizontalFlip(p=0.2),
-            A.CoarseDropout(max_holes=1,min_holes = 1, max_height=8, max_width=8, p=0.5,fill_value=np.mean(mean), min_height=8, min_width=8, mask_fill_value = None)          
+            A.PadIfNeeded(min_height=40, min_width=40, always_apply=True),
+            A.RandomCrop(width=32, height=32),
+            A.HorizontalFlip(),
+            A.Cutout(num_holes=1, max_h_size=8, max_w_size=8)
+            #A.CoarseDropout(max_holes=1,min_holes = 1, max_height=8, max_width=8, p=0.5,fill_value=np.mean(mean), min_height=8, min_width=8, mask_fill_value = None)          
         })
 
         self.norm = A.Compose({A.Normalize(mean, std),
