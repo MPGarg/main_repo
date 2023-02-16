@@ -76,4 +76,5 @@ class Custom_ResNet(nn.Module):
     y = y.view(y.size(0), -1)
     y = self.fc(y)
     
-    return F.log_softmax(y,dim=1)
+    return y
+    #return F.log_softmax(y,dim=1)
