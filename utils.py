@@ -35,8 +35,8 @@ def set_albumen_params(mean, std):
     shiftscalerotate_prob= 0.25
     num_holes= 1
     cutout_prob= 0.5
-    max_height = 16 #32/2
-    max_width = 16 #32/2
+    max_height = 8
+    max_width = 8
 
     transform_train = A.Compose(
         [
