@@ -59,21 +59,21 @@ class Custom_ResNet(nn.Module):
     self.fc =   nn.Linear(512,10, bias=False) 
     
   def forward(self, x):
-    x = self.prep(x)
+    y = self.prep(x)
     
-    x = self.layer1(x)
-    r1  = self.resblock1(x)
-    x = x + r1
+    y = self.layer1(y)
+    r1  = self.resblock1(y)
+    y = y + r1
     
-    x = self.layer2(x)
+    y = self.layer2(y)
     
-    x = self.layer3(x)
-    r2 = self.resblock2(x)
-    x = x + r2
+    y = self.layer3(y)
+    r2 = self.resblock2(y)
+    y = y + r2
     
-    x = self.pool(x)
+    y = self.pool(y)
 	
-    x = x.view(x.size(0), -1)
-    x = self.fc(x)
+    y = y.view(y.size(0), -1)
+    y = self.fc(y)
     
-    return F.log_softmax(x,dim=-1)
+    return F.log_softmax(y,dim=1)
