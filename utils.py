@@ -57,8 +57,8 @@ def process_dataset(batch_size=512,visualize = ''):
     trainset = datasets.CIFAR10(root='./data', train=True, download=True)
     testset = datasets.CIFAR10(root='./data', train=False, download=True)
 
-    mean = np.mean(trainset, axis=(0,1,2)) / 255.
-    std = np.std(trainset, axis=(0,1,2)) / 255.
+    mean = np.mean(trainset.data, axis=(0,1,2)) / 255.
+    std = np.std(trainset.data, axis=(0,1,2)) / 255.
 
     if visualize == 'X':
         viz_data(trainset)
