@@ -69,6 +69,23 @@ def process_dataset(batch_size=512,visualize = ''):
 
     return trainset,trainloader,testset,testloader , mean, std 
 
+
+def save_model(model, epoch, optimizer, path):
+    """Save torch model in .pt format
+
+    Args:
+        model (instace): torch instance of model to be saved
+        epoch (int): epoch num
+        optimizer (instance): torch optimizer
+        path (str): model saving path
+    """
+    state = {
+        'epoch': epoch,
+        'state_dict': model.state_dict(),
+        'optimizer': optimizer.state_dict()
+    }
+    torch.save(state, path)
+    
 def plot_acc_loss(train_acc,train_losses,test_acc,test_losses):
     fig, axs = plt.subplots(1,2,figsize=(15,5))
 

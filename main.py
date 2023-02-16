@@ -89,7 +89,7 @@ def test(model, device, test_loader,test_losses, test_acc,epoch,criterion,target
     test_acc.append(100. * correct / len(test_loader.dataset))
     return accuracy_epoch
 
-def fit_model(model, trainloader, testloader,criterion, EPOCHS, lr=0.001, device='cuda',sched='StepLR',lambda_l1=0,target_acc=100,optim='SGD'):
+def fit_model(model, optimizer, criterion, trainloader, testloader, EPOCHS, device,lambda_l1=0,target_acc=100,scheduler=None, save_best=False):
     wrong_prediction_list = []
     right_prediction_list = []
     train_losses = []
@@ -97,36 +97,25 @@ def fit_model(model, trainloader, testloader,criterion, EPOCHS, lr=0.001, device
     test_losses = []
     test_acc = []
 
-    #torch.manual_seed(42)
-    if optim == 'SGD':
-        optimizer = SGD(model.parameters(), lr=lr, momentum=0.9)
-    elif optim == 'ADAM':
-        optimizer = Adam(model.parameters(), lr=lr, betas=(0.9, 0.999))
-    else:
-        optimizer = SGD(model.parameters(), lr=lr, momentum=0.9)      #fallback if nothing given
-
-    if sched == 'StepLR':
-        scheduler = StepLR(optimizer, step_size=100, gamma=0.25)    
-        sched_fl = 'X'
-    elif sched == 'OneCycle':
-        scheduler = OneCycleLR(optimizer=optimizer, max_lr=0.05, epochs=EPOCHS, steps_per_epoch=len(trainloader), pct_start=5/EPOCHS, div_factor=10) 
-        sched_fl = 'X'
-    else:
-        sched_fl = ' '
-
-    lambda_l1 = lambda_l1
+    lr_trend = []
+    if save_best:
+        min_val_loss = np.inf
+        save_path = 'model.pt'
     
     for epoch in range(EPOCHS):
         print("EPOCH:", epoch+1)
         train(model, device, trainloader, optimizer, epoch, criterion, train_losses, train_acc, lambda_l1)
 
-        if sched_fl == 'X':
-            scheduler.step()
+# updating LR
+        if scheduler:
+            if not isinstance(scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
+                scheduler.step()
+                lr_trend.append(scheduler.get_last_lr()[0])
 
         eval_test_acc = test(model, device, testloader, test_losses, criterion, test_acc, epoch)
         if(eval_test_acc >= target_acc):
             break
-    
+
     model.eval()
     for images, labels in testloader:
         images, labels = images.to(device), labels.to(device)
