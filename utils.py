@@ -8,19 +8,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from torch.utils.data import Dataset, DataLoader
 
-class cifar_ds10(torchvision.datasets.CIFAR10):
-    def __init__(self, root="./data", train=True, download=True, transform=None):
-        super().__init__(root=root, train=train, download=download, transform=transform)
-
-    def __getitem__(self, index):
-        image, label = self.data[index], self.targets[index]
-
-        if self.transform is not None:
-            transformed = self.transform(image=image)
-            image = transformed["image"]
-
-        return image, label
-
 # custom dataset class for albumentations library
 class AlbumentationImageDataset(Dataset):
     def __init__(self, image_list, mean, std, train= True):
@@ -67,8 +54,8 @@ def viz_data(exp, cols=8, rows=5):
     plt.show() 
     
 def process_dataset(batch_size=512,visualize = ''):
-    trainset = cifar_ds10(root='./data', train=True, download=True)
-    testset = cifar_ds10(root='./data', train=False, download=True)
+    trainset = datasets.CIFAR10(root='./data', train=True, download=True)
+    testset = datasets.CIFAR10(root='./data', train=False, download=True)
 
     mean = np.mean(trainset, axis=(0,1,2)) / 255.
     std = np.std(trainset, axis=(0,1,2)) / 255.
