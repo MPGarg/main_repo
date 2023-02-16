@@ -15,6 +15,7 @@ class AlbumentationImageDataset(Dataset):
         self.image_list = image_list
         #RandomCrop 32, 32 (after padding of 4) >> FlipLR >> Followed by CutOut(8, 8)
         self.aug = A.Compose({
+                    ToTensorV2(),
                     A.Normalize((0.49139968, 0.48215841, 0.44653091), (0.24703223, 0.24348513, 0.26158784)),
                     A.HorizontalFlip(),
                     A.ShiftScaleRotate(),
@@ -28,7 +29,9 @@ class AlbumentationImageDataset(Dataset):
             #A.CoarseDropout(max_holes=1,min_holes = 1, max_height=8, max_width=8, p=0.5,fill_value=np.mean(mean), min_height=8, min_width=8, mask_fill_value = None)          
         })
 
-        self.norm = A.Compose({A.Normalize((0.49139968, 0.48215841, 0.44653091), (0.24703223, 0.24348513, 0.26158784)),
+        self.norm = A.Compose({
+            ToTensorV2(),
+            A.Normalize((0.49139968, 0.48215841, 0.44653091), (0.24703223, 0.24348513, 0.26158784)),
         })
         self.train = train
             
@@ -45,7 +48,8 @@ class AlbumentationImageDataset(Dataset):
         else:
             image = self.norm(image=np.array(image))['image']
         image = np.transpose(image, (2, 0, 1)).astype(np.float32)
-        return torch.tensor(image, dtype=torch.float), label    
+        #return torch.tensor(image, dtype=torch.float), label
+        return image, label    
 
 def viz_data(exp, cols=8, rows=5):
     figure = plt.figure(figsize=(14, 10))
