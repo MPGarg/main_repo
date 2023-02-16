@@ -16,8 +16,8 @@ class AlbumentationImageDataset(Dataset):
 
         self.aug = A.Compose({
             A.Normalize(mean, std),
-            A.PadIfNeeded(min_height=40, min_width=40, always_apply=True),
-            A.RandomCrop(width=32, height=32),
+            #A.PadIfNeeded(min_height=40, min_width=40, always_apply=True),
+            #A.RandomCrop(width=32, height=32),
             A.HorizontalFlip(p=0.2),
             A.CoarseDropout(max_holes=1,min_holes = 1, max_height=8, max_width=8, p=0.5,fill_value=np.mean(mean), min_height=8, min_width=8, mask_fill_value = None)          
         })
@@ -85,7 +85,7 @@ def save_model(model, epoch, optimizer, path):
         'optimizer': optimizer.state_dict()
     }
     torch.save(state, path)
-    
+
 def plot_acc_loss(train_acc,train_losses,test_acc,test_losses):
     fig, axs = plt.subplots(1,2,figsize=(15,5))
 
