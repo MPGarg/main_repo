@@ -104,15 +104,15 @@ def fit_model(model, optimizer, criterion, trainloader, testloader, EPOCHS, devi
     
     for epoch in range(EPOCHS):
         print("EPOCH:", epoch+1)
-        train(model, device, trainloader, optimizer, epoch, criterion, train_losses, train_acc, lambda_l1)
+        train(model, device, trainloader, optimizer, epoch, train_losses, train_acc, criterion, lambda_l1)
 
 # updating LR
         if scheduler:
             if not isinstance(scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
                 scheduler.step()
                 lr_trend.append(scheduler.get_last_lr()[0])
-
-        eval_test_acc = test(model, device, testloader, test_losses, criterion, test_acc, epoch)
+                
+        eval_test_acc = test(model, device, testloader, test_losses, test_acc, epoch, criterion)
         if(eval_test_acc >= target_acc):
             break
 
