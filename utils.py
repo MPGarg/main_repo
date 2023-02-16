@@ -76,18 +76,23 @@ def load_data():
                                           shuffle=False, num_workers=2)
     return trainloader, trainset  
 
-def viz_data(exp, cols=8, rows=5):
-    figure = plt.figure(figsize=(14, 10))
-    for i in range(1, cols * rows + 1):
-        img, label = exp[i]
+def show_sample(dataset):
+    classes = ['plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
+        
+    dataiter = iter(dataset)
 
-        figure.add_subplot(rows, cols, i)
-        plt.title(exp.classes[label])
-        plt.axis("off")
-        plt.imshow(img, cmap="gray")
-
-    plt.tight_layout()
-    plt.show() 
+    index = 0
+    fig = plt.figure(figsize=(20,10))
+    for i in range(10):
+        images, labels = next(dataiter)
+        actual = classes[labels]
+        image = images.squeeze().to('cpu').numpy()
+        ax = fig.add_subplot(2, 5, index+1)
+        index = index + 1
+        ax.axis('off')
+        ax.set_title(f'\n Label : {actual}',fontsize=10) 
+        ax.imshow(np.transpose(image, (1, 2, 0))) 
+        images, labels = next(dataiter) 
     
 def process_dataset(batch_size=512,visualize = ''):
     trl, trs = load_data()
@@ -99,7 +104,7 @@ def process_dataset(batch_size=512,visualize = ''):
     trainset_mod, trainloader_mod, testset_mod, testloader_mod = tl_ts_mod(transform_train,transform_valid,batch_size=batch_size)
 
     if visualize == 'X':
-        viz_data(trs)
+        show_sample(trs)
 
     return trainset_mod, trainloader_mod, testset_mod, testloader_mod , mean, std 
 
