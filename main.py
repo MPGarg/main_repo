@@ -15,7 +15,7 @@ test_losses = []
 train_acc = []
 test_acc = []
 
-def train(model, device, train_loader, optimizer, epoch, train_losses, train_acc,criterion, lambda_l1=0):
+def train(model, device, train_loader, optimizer, epoch, train_losses, train_acc,criterion,scheduler, lr_trend, lambda_l1=0):
 
     model.train()
     pbar = tqdm(train_loader)
@@ -50,6 +50,11 @@ def train(model, device, train_loader, optimizer, epoch, train_losses, train_acc
         loss.backward()
         optimizer.step()
 
+        # updating LR
+        if scheduler:
+            if not isinstance(scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
+                scheduler.step()
+                lr_trend.append(scheduler.get_last_lr()[0])
         # Update pbar-tqdm
         
         pred = y_pred.argmax(dim=1, keepdim=True)  # get the index of the max log-probability
@@ -101,13 +106,7 @@ def fit_model(model, optimizer, criterion, trainloader, testloader, EPOCHS, devi
     
     for epoch in range(EPOCHS):
         print("EPOCH: {} (LR: {})".format(epoch+1, optimizer.param_groups[0]['lr']))
-        train(model, device, trainloader, optimizer, epoch, train_losses, train_acc, criterion, lambda_l1)
-
-# updating LR
-        if scheduler:
-            if not isinstance(scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
-                scheduler.step()
-                lr_trend.append(scheduler.get_last_lr()[0])
+        train(model, device, trainloader, optimizer, epoch, train_losses, train_acc, criterion,scheduler,lr_trend, lambda_l1)
 
         eval_test_acc = test(model, device, testloader, test_losses, test_acc, epoch, criterion)
         if(eval_test_acc >= target_acc):
