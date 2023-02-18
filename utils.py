@@ -100,12 +100,12 @@ def process_dataset(batch_size=512,visualize = ''):
     std = list(np.round(trs.data.std(axis=(0,1,2))/255.,4))
         
     transform_train, transform_valid = set_albumen_params(mean, std)
-    trainset_mod, trainloader_mod, testset_mod, testloader_mod = tl_ts_mod(transform_train,transform_valid,batch_size=batch_size)
+    trainset_mod, trainloader_mod, testset_mod, testloader_mod,trainset_lr = tl_ts_mod(transform_train,transform_valid,batch_size=batch_size)
 
     if visualize == 'X':
         show_sample(trs)
 
-    return trainset_mod, trainloader_mod, testset_mod, testloader_mod , mean, std 
+    return trainset_mod, trainloader_mod, testset_mod, testloader_mod , mean, std ,trainset_lr
 
 
 def save_model(model, epoch, optimizer, path):
