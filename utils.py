@@ -23,11 +23,12 @@ class cifar_ds10(torchvision.datasets.CIFAR10):
         return image, label
 
 def tl_ts_mod(transform_train,transform_valid,batch_size=512):
+    trainset_lr = cifar_ds10(root='./data', train=True, download=True, transform=None)
     trainset = cifar_ds10(root='./data', train=True, download=True, transform=transform_train)
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=2)
     testset = cifar_ds10(root='./data', train=False, download=True, transform=transform_valid)
     testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=False, num_workers=2)
-    return trainset,trainloader,testset,testloader
+    return trainset,trainloader,testset,testloader,trainset_lr
   
 def set_albumen_params(mean, std):
     num_holes= 1
