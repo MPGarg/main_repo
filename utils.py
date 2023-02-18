@@ -23,12 +23,15 @@ class cifar_ds10(torchvision.datasets.CIFAR10):
         return image, label
 
 def tl_ts_mod(transform_train,transform_valid,batch_size=512):
-    trainset_lr = cifar_ds10(root='./data', train=True, download=True, transform=None)
+    #for determining LR
+    trainset_lr = cifar_ds10(root='./data', train=True, download=True, transform=transform_valid)
+    trainloader_lr = torch.utils.data.DataLoader(trainset_lr, batch_size=batch_size, shuffle=True, num_workers=2)
+    #for main training
     trainset = cifar_ds10(root='./data', train=True, download=True, transform=transform_train)
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=2)
     testset = cifar_ds10(root='./data', train=False, download=True, transform=transform_valid)
     testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=False, num_workers=2)
-    return trainset,trainloader,testset,testloader,trainset_lr
+    return trainset,trainloader,testset,testloader,trainset_lr,trainloader_lr
   
 def set_albumen_params(mean, std):
     num_holes= 1
@@ -100,12 +103,12 @@ def process_dataset(batch_size=512,visualize = ''):
     std = list(np.round(trs.data.std(axis=(0,1,2))/255.,4))
         
     transform_train, transform_valid = set_albumen_params(mean, std)
-    trainset_mod, trainloader_mod, testset_mod, testloader_mod,trainset_lr = tl_ts_mod(transform_train,transform_valid,batch_size=batch_size)
+    trainset_mod, trainloader_mod, testset_mod, testloader_mod,trainset_lr,trainloader_lr = tl_ts_mod(transform_train,transform_valid,batch_size=batch_size)
 
     if visualize == 'X':
         show_sample(trs)
 
-    return trainset_mod, trainloader_mod, testset_mod, testloader_mod , mean, std ,trainset_lr
+    return trainset_mod, trainloader_mod, testset_mod, testloader_mod , mean, std ,trainset_lr,trainloader_lr
 
 
 def save_model(model, epoch, optimizer, path):
