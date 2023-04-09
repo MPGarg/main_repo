@@ -348,3 +348,26 @@ def plot_gradcam(gcam_layers, target_layers, class_names, image_size,predicted, 
         plt.axis('off')
     plt.show()
      
+#For Unet
+class Oxford_Pet(torchvision.datasets.OxfordIIITPet):
+    def __init__(self, root="./data", train=True, download=True, transform=None):
+        super().__init__(root=root, train=train, download=download, transform=transform)
+
+    def __getitem__(self, index):
+        image, label = self.data[index], self.targets[index]
+
+        if self.transform is not None:
+            transformed = self.transform(image=image)
+            image = transformed["image"]
+
+        return image, label
+
+def tl_ts_mod_unet(batch_size=64,transform_train=None):
+    transform = transforms.Compose(
+      [transforms.Resize(size=(128,128)),
+       transforms.ToTensor()])
+    trainset = Oxford_Pet(root='./data', split='trainval', target_types='segmentation', transform=transform, download=True)
+    trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=2)
+    testset = Oxford_Pet(root='./data', split='test', target_types='segmentation', transform=transform, download=True)
+    testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=False, num_workers=2)
+    return trainset,trainloader,testset,testloader     

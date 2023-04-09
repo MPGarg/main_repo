@@ -126,3 +126,77 @@ def fit_model(model, optimizer, criterion, trainloader, testloader, EPOCHS, devi
 
     print(f'Total Number of incorrectly predicted images by model is {len(wrong_prediction_list)}')
     return model, wrong_prediction_list, right_prediction_list, train_losses, train_acc, test_losses, test_acc
+
+#Unet
+def train_unet(model, device, train_loader, optimizer, epoch, train_losses,criterion,scheduler):
+
+    model.train()
+    pbar = tqdm(train_loader)
+    processed = 0
+    train_loss = 0
+
+    for batch_idx, (data, target) in enumerate(pbar):
+        # get samples
+        data, target = data.to(device), target.to(device)
+
+        # Init
+        optimizer.zero_grad()
+        # In PyTorch, we need to set the gradients to zero before starting to do backpropragation because PyTorch accumulates the gradients on subsequent backward passes. 
+        # Because of this, when you start your training loop, ideally you should zero out the gradients so that you do the parameter update correctly.
+
+        # Predict
+        y_pred = model(data)
+
+        # Calculate loss
+        loss = criterion(y_pred, target)
+
+        train_loss += loss.item()
+
+        # Backpropagation
+        loss.backward()
+        optimizer.step() 
+    
+    train_losses.append(train_loss/len(train_loader.dataset))
+
+    print(f'\nAverage Training Loss={train_loss/len(train_loader.dataset)}')
+
+def test_unet(model, device, test_loader,test_losses,criterion):
+    model.eval()
+    test_loss = 0
+
+    with torch.no_grad():
+        for data, target in test_loader:
+            data, target = data.to(device), target.to(device)
+            output = model(data)
+            test_loss += criterion(output, target).item()  # sum up batch loss
+
+    test_loss /= len(test_loader.dataset)
+    test_losses.append(test_loss)
+
+    print('Test set: Average loss={test_loss}')
+    
+
+def fit_model_unet(model, optimizer, criterion, trainloader, testloader, EPOCHS, device,scheduler=None):
+    train_losses = []
+    test_losses = []
+    
+    for epoch in range(EPOCHS):
+        print("EPOCH: {} (LR: {})".format(epoch+1, optimizer.param_groups[0]['lr']))
+        train_unet(model, device, trainloader, optimizer, epoch, train_losses, criterion,scheduler)
+        test_unet(model, device, testloader, test_losses, criterion)
+
+    return model, train_losses, test_losses
+
+def dice_loss(pred, target):
+    smooth = 1e-5
+    
+    # flatten predictions and targets
+    pred = pred.view(-1)
+    target = target.view(-1)
+    
+    intersection = (pred * target).sum()
+    union = pred.sum() + target.sum()
+    
+    dice = (2. * intersection + smooth) / (union + smooth)
+    
+    return 1 - dice   
