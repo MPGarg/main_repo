@@ -350,8 +350,8 @@ def plot_gradcam(gcam_layers, target_layers, class_names, image_size,predicted, 
      
 #For Unet
 class Oxford_Pet(torchvision.datasets.OxfordIIITPet):
-    def __init__(self, root="./data", train=True, download=True, transform=None):
-        super().__init__(root=root, train=train, download=download, transform=transform)
+    def __init__(self, root="./data", split='trainval', target_types='segmentation', transform=None, download=True):
+        super().__init__(root=root, split=split, target_types=target_types,download=download, transform=transform)
 
     def __getitem__(self, index):
         image, label = self.data[index], self.targets[index]
