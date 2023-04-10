@@ -137,8 +137,8 @@ def train_unet(model, device, train_loader, optimizer, epoch, train_losses,crite
     for batch_idx, (data, target) in enumerate(pbar):
         # get samples
         data, target = data.to(device), target.to(device)
-        print(data)
-        print(target)
+        #print(data)
+        #print(target)
         # Init
         optimizer.zero_grad()
         # In PyTorch, we need to set the gradients to zero before starting to do backpropragation because PyTorch accumulates the gradients on subsequent backward passes. 
@@ -146,12 +146,12 @@ def train_unet(model, device, train_loader, optimizer, epoch, train_losses,crite
 
         # Predict
         y_pred = model(data)
-        print(y_pred)
-        
+        #print(y_pred)
+
         # Calculate loss
         loss = criterion(y_pred, target)
-        print(loss)
-        print(loss.item())
+        #print(loss)
+        #print(loss.item())
         train_loss += loss.item()
 
         # Backpropagation
