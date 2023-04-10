@@ -148,8 +148,9 @@ def train_unet(model, device, train_loader, optimizer, epoch, train_losses,crite
 
         # Calculate loss
         loss = criterion(y_pred, target)
-
-        train_loss += loss
+        print(loss)
+        print(loss.item())
+        train_loss += loss.item()
 
         # Backpropagation
         loss.backward()
@@ -167,7 +168,7 @@ def test_unet(model, device, test_loader,test_losses,criterion):
         for data, target in test_loader:
             data, target = data.to(device), target.to(device)
             output = model(data)
-            test_loss += criterion(output, target)  # sum up batch loss
+            test_loss += criterion(output, target).item()  # sum up batch loss
 
     test_loss /= len(test_loader.dataset)
     test_losses.append(test_loss)
