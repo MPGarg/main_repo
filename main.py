@@ -146,7 +146,8 @@ def train_unet(model, device, train_loader, optimizer, epoch, train_losses,crite
 
         # Predict
         y_pred = model(data)
-
+        print(y_pred)
+        
         # Calculate loss
         loss = criterion(y_pred, target)
         print(loss)
