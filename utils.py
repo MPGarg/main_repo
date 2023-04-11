@@ -375,3 +375,62 @@ def tl_ts_mod_unet(batch_size=64,transform_train=None):
     testset = Oxford_Pet(root='./data', split='test', target_types='segmentation', transform=transform, download=True)
     testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=False, num_workers=2)
     return trainset,trainloader,testset,testloader      
+
+def show_sample_unet(dataset):
+    dataiter = iter(dataset)
+
+    index = 0
+    fig = plt.figure(figsize=(20,10))
+    for i in range(4):
+        images, labels = next(dataiter)
+        actual = 'Original' 
+        image = images 
+        ax = fig.add_subplot(2, 4, index+1)
+        index = index + 1
+        ax.set_title(f'\n Label : {actual}',fontsize=10) 
+        ax.imshow(np.transpose(image, (1, 2, 0)))
+        ax = fig.add_subplot(2, 4, index+1)
+        index = index + 1
+        lbl = 'Ground Truth'
+        ax.set_title(f'\n Label : {lbl}',fontsize=10) 
+        ax.imshow(np.transpose(labels, (1, 2, 0)))
+        images, labels = next(dataiter)
+
+def plot_acc_loss_unet(train_losses):
+    fig, axs = plt.subplots(1,1,figsize=(10,5))
+
+    axs[0].plot(train_losses, label='Training Losses')
+    axs[0].legend(loc='upper right')
+    axs[0].set_xlabel('Epochs')
+    axs[0].set_ylabel('Loss')
+    axs[0].set_title("Loss")
+
+    plt.show()   
+
+def show_sample_output_unet(model,loader,device,image_no=2):
+    dataiter = iter(loader)
+
+    with torch.no_grad():
+        index = 0
+        fig = plt.figure(figsize=(20,10))
+        for i in range(image_no):
+            images, labels = next(dataiter)
+            data, target = images.to(device), labels.to(device)
+            output = model(data)
+            actual = 'Original' 
+            image = output.to('cpu').numpy() 
+            ax = fig.add_subplot(image_no, 3, index+1)
+            index = index + 1
+            ax.set_title(f'\n Label : {actual}',fontsize=10) 
+            ax.imshow(np.transpose(images[0], (1, 2, 0))) 
+            ax = fig.add_subplot(image_no, 3, index+1)
+            index = index + 1
+            lbl = 'Ground Truth'
+            ax.set_title(f'\n Label : {lbl}',fontsize=10)
+            ax.imshow(np.transpose(labels[0], (1, 2, 0)))
+            ax = fig.add_subplot(image_no, 3, index+1)
+            index = index + 1
+            lbl = 'Predicted'
+            ax.set_title(f'\n Label : {lbl}',fontsize=10)
+            ax.imshow(np.transpose(image[0], (1, 2, 0)))
+            images, labels = next(dataiter)
