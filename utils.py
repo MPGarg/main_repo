@@ -399,11 +399,11 @@ def show_sample_unet(dataset):
 def plot_acc_loss_unet(train_losses):
     fig, axs = plt.subplots(1,1,figsize=(10,5))
 
-    axs[0].plot(train_losses, label='Training Losses')
-    axs[0].legend(loc='upper right')
-    axs[0].set_xlabel('Epochs')
-    axs[0].set_ylabel('Loss')
-    axs[0].set_title("Loss")
+    axs.plot(train_losses, label='Training Losses')
+    axs.legend(loc='upper right')
+    axs.set_xlabel('Epochs')
+    axs.set_ylabel('Loss')
+    axs.set_title("Loss")
 
     plt.show()   
 
