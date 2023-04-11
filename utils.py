@@ -362,7 +362,7 @@ class Oxford_Pet(torchvision.datasets.OxfordIIITPet):
 
         if self.transform is not None:
             image, label = self.transforms(image, label)
-            label = label.resize((128,128))
+            label = transforms.Resize(size=(128,128))(label)
 
         return image, label
 
