@@ -362,7 +362,10 @@ class Oxford_Pet(torchvision.datasets.OxfordIIITPet):
 
         if self.transform is not None:
             image, label = self.transforms(image, label)
-            label = transforms.Resize(size=(128,128))(label)
+            single_mask = label.resize((128, 128))
+            single_mask = np.reshape(single_mask,(128,128,1))
+            single_mask = np.transpose(single_mask, (2, 0, 1))
+            label = single_mask
 
         return image, label
 
@@ -415,6 +418,7 @@ def show_sample_output_unet(model,loader,device,image_no=2):
         fig = plt.figure(figsize=(20,10))
         for i in range(image_no):
             images, labels = next(dataiter)
+            labels = labels.to(torch.float)
             data, target = images.to(device), labels.to(device)
             output = model(data)
             actual = 'Original' 
