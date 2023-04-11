@@ -66,18 +66,19 @@ class UNet(nn.Module):
     def __init__(self, in_channels, out_channels):
         super(UNet, self).__init__()
         
-        self.contract1 = ContractingBlock(in_channels, 64)
-        self.contract2 = ContractingBlock(64, 128)
-        self.contract3 = ContractingBlock(128, 256)
-        self.contract4 = ContractingBlock(256, 512)
-        self.contract5 = ContractingBlock(512, 1024)
+        self.contract1 = ContractingBlock(in_channels, 32)
+        self.contract2 = ContractingBlock(32, 64)
+        self.contract3 = ContractingBlock(64, 128)
+        self.contract4 = ContractingBlock(128, 256)
+        self.contract5 = ContractingBlock(256, 512)
 
-        self.expand1 = ExpandingBlock(1024, 512)        
-        self.expand2 = ExpandingBlock(512, 256)
-        self.expand3 = ExpandingBlock(256, 128)
-        self.expand4 = ExpandingBlock(128, 64)
+        self.expand1 = ExpandingBlock(512, 256)        
+        self.expand2 = ExpandingBlock(256, 128)
+        self.expand3 = ExpandingBlock(128, 64)
+        self.expand4 = ExpandingBlock(64, 32)
         
-        self.final_conv = nn.Conv2d(64, out_channels, kernel_size=1)
+        self.conv_sec = nn.Conv2d(32, 3, kernel_size=3, padding=1)
+        self.final_conv = nn.Conv2d(3, out_channels, kernel_size=1)
         
     def forward(self, x):
         # Contracting path
@@ -93,5 +94,7 @@ class UNet(nn.Module):
         x = self.expand3(x, skip2)
         x = self.expand4(x, skip1)
 
+        x = self.conv_sec(x)
+        
         return self.final_conv(x)
      
