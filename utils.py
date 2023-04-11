@@ -372,12 +372,14 @@ class Oxford_Pet(torchvision.datasets.OxfordIIITPet):
             single_img = image.resize((i_h,i_w))
             single_img = np.reshape(single_img,(i_h,i_w,i_c)) 
             single_img = single_img/256.
+            X = single_img
 
             single_mask = label.resize((m_h, m_w))
             single_mask = np.reshape(single_mask,(m_h,m_w,m_c)) 
             single_mask = single_mask - 1
+            y = single_mask
 
-        return single_img, single_mask
+        return X, y
 
 def tl_ts_mod_unet(batch_size=64,transform_train=None):
     transform = transforms.Compose(
