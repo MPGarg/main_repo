@@ -137,8 +137,8 @@ def train_unet(model, device, train_loader, optimizer, epoch, train_losses,crite
     for batch_idx, (data, target) in enumerate(pbar):
         # get samples
         data = data.to(torch.float)
-        target = target.to(torch.int)
-        
+        target = target.to(torch.float)
+
         data, target = data.to(device), target.to(device)
 
         # Init
