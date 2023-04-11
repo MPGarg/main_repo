@@ -379,6 +379,9 @@ class Oxford_Pet(torchvision.datasets.OxfordIIITPet):
             single_mask = single_mask - 1
             y = single_mask
 
+        X = np.transpose(X, (2, 0, 1))
+        y = np.transpose(y, (2, 0, 1))
+
         return X, y
 
 def tl_ts_mod_unet(batch_size=64,transform_train=None):
