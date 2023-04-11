@@ -188,6 +188,7 @@ def fit_model_unet(model, optimizer, criterion, trainloader, testloader, EPOCHS,
 
 def dice_loss(pred, target):
     smooth = 1e-5
+    pred = F.sigmoid(pred)
     
     # flatten predictions and targets
     pred = pred.view(-1)

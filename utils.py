@@ -360,11 +360,24 @@ class Oxford_Pet(torchvision.datasets.OxfordIIITPet):
         image = Image.open(images).convert("RGB")
         label = Image.open(labels)
 
-        if self.transform is not None:
-            image, _= self.transforms(image, label)
-            label, _ = self.transforms(label, label)
+        i_h,i_w,i_c = 128,128,3
+        m_h,m_w,m_c = 128,128,1
 
-        return image, label
+        X = np.zeros((i_h,i_w,i_c), dtype=np.float32)
+        y = np.zeros((m_h,m_w,m_c), dtype=np.int32)
+
+        if self.transform is not None:
+            #image, label = self.transforms(image, label)
+            #label = label.Resize(size=(128,128))
+            single_img = image.resize((i_h,i_w))
+            single_img = np.reshape(single_img,(i_h,i_w,i_c)) 
+            single_img = single_img/256.
+
+            single_mask = label.resize((m_h, m_w))
+            single_mask = np.reshape(single_mask,(m_h,m_w,m_c)) 
+            single_mask = single_mask - 1
+
+        return single_img, single_mask
 
 def tl_ts_mod_unet(batch_size=64,transform_train=None):
     transform = transforms.Compose(
@@ -399,11 +412,11 @@ def show_sample_unet(dataset):
 def plot_acc_loss_unet(train_losses):
     fig, axs = plt.subplots(1,1,figsize=(10,5))
 
-    axs.plot(train_losses, label='Training Losses')
-    axs.legend(loc='upper right')
-    axs.set_xlabel('Epochs')
-    axs.set_ylabel('Loss')
-    axs.set_title("Loss")
+    axs[0].plot(train_losses, label='Training Losses')
+    axs[0].legend(loc='upper right')
+    axs[0].set_xlabel('Epochs')
+    axs[0].set_ylabel('Loss')
+    axs[0].set_title("Loss")
 
     plt.show()   
 
