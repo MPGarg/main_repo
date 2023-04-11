@@ -77,9 +77,9 @@ class UNet(nn.Module):
         self.expand3 = ExpandingBlock(128, 64)
         self.expand4 = ExpandingBlock(64, 32)
         
-        self.conv_sec = nn.Conv2d(32, 3, kernel_size=3, padding=1)
-        self.relu1 = nn.ReLU(inplace=True)
-        self.final_conv = nn.Conv2d(3, out_channels, kernel_size=1)
+        #self.conv_sec = nn.Conv2d(32, 3, kernel_size=3, padding=1)
+
+        self.final_conv = nn.Conv2d(32, out_channels, kernel_size=1)
         
     def forward(self, x):
         # Contracting path
@@ -95,7 +95,7 @@ class UNet(nn.Module):
         x = self.expand3(x, skip2)
         x = self.expand4(x, skip1)
 
-        x = self.relu1(self.conv_sec(x))
+        #x = self.conv_sec(x)
 
         return self.final_conv(x)
      
