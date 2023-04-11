@@ -137,8 +137,7 @@ def train_unet(model, device, train_loader, optimizer, epoch, train_losses,crite
     for batch_idx, (data, target) in enumerate(pbar):
         # get samples
         data, target = data.to(device), target.to(device)
-        #print(data)
-        #print(target)
+
         # Init
         optimizer.zero_grad()
         # In PyTorch, we need to set the gradients to zero before starting to do backpropragation because PyTorch accumulates the gradients on subsequent backward passes. 
@@ -146,12 +145,10 @@ def train_unet(model, device, train_loader, optimizer, epoch, train_losses,crite
 
         # Predict
         y_pred = model(data)
-        #print(y_pred)
 
         # Calculate loss
         loss = criterion(y_pred, target)
-        #print(loss)
-        #print(loss.item())
+
         train_loss += loss.item()
 
         # Backpropagation
@@ -175,7 +172,7 @@ def test_unet(model, device, test_loader,test_losses,criterion):
     test_loss /= len(test_loader.dataset)
     test_losses.append(test_loss)
 
-    print('Test set: Average loss={test_loss}')
+    print(f'Test set: Average loss={test_loss}')
     
 
 def fit_model_unet(model, optimizer, criterion, trainloader, testloader, EPOCHS, device,scheduler=None):
@@ -185,7 +182,7 @@ def fit_model_unet(model, optimizer, criterion, trainloader, testloader, EPOCHS,
     for epoch in range(EPOCHS):
         print("EPOCH: {} (LR: {})".format(epoch+1, optimizer.param_groups[0]['lr']))
         train_unet(model, device, trainloader, optimizer, epoch, train_losses, criterion,scheduler)
-        test_unet(model, device, testloader, test_losses, criterion)
+        #test_unet(model, device, testloader, test_losses, criterion)
 
     return model, train_losses, test_losses
 
