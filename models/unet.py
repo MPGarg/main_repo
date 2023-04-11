@@ -30,7 +30,7 @@ class ContractingBlock(nn.Module):
         return x, skip
 
 class ExpandingBlock(nn.Module):
-    def __init__(self, in_channels, out_channels):
+    def __init__(self, in_channels, out_channels, mode='transpose'):
         super(ExpandingBlock, self).__init__()
         
         self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1)
@@ -41,7 +41,11 @@ class ExpandingBlock(nn.Module):
         self.bn2 = nn.BatchNorm2d(out_channels)
         self.relu2 = nn.ReLU(inplace=True)
         
-        self.upsample = nn.ConvTranspose2d(in_channels, out_channels, kernel_size=2, stride=2)        
+        if mode=='transpose':
+            self.upsample = nn.ConvTranspose2d(in_channels, out_channels, kernel_size=2, stride=2)
+        else:
+            self.upsample = nn.Sequential(nn.Upsample(scale_factor=2, mode='nearest'),
+                                          nn.Conv2d(in_channels, out_channels, kernel_size=1,stride=1))
 
     def forward(self, x, skip):
         
