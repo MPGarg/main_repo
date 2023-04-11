@@ -360,29 +360,11 @@ class Oxford_Pet(torchvision.datasets.OxfordIIITPet):
         image = Image.open(images).convert("RGB")
         label = Image.open(labels)
 
-        i_h,i_w,i_c = 128,128,3
-        m_h,m_w,m_c = 128,128,1
-
-        X = np.zeros((i_h,i_w,i_c), dtype=np.float32)
-        y = np.zeros((m_h,m_w,m_c), dtype=np.int32)
-
         if self.transform is not None:
-            #image, label = self.transforms(image, label)
-            #label = label.Resize(size=(128,128))
-            single_img = image.resize((i_h,i_w))
-            single_img = np.reshape(single_img,(i_h,i_w,i_c)) 
-            single_img = single_img/256.
-            X = single_img
+            image, label = self.transforms(image, label)
+            label = label.resize((128,128))
 
-            single_mask = label.resize((m_h, m_w))
-            single_mask = np.reshape(single_mask,(m_h,m_w,m_c)) 
-            single_mask = single_mask - 1
-            y = single_mask
-
-        X = np.transpose(X, (2, 0, 1))
-        y = np.transpose(y, (2, 0, 1))
-
-        return X, y
+        return image, label
 
 def tl_ts_mod_unet(batch_size=64,transform_train=None):
     transform = transforms.Compose(
