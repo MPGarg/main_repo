@@ -30,7 +30,7 @@ class ContractingBlock(nn.Module):
         return x, skip
 
 class ExpandingBlock(nn.Module):
-    def __init__(self, in_channels, out_channels, mode='transpose', r='True'):
+    def __init__(self, in_channels, out_channels, mode='transpose', r=True):
         super(ExpandingBlock, self).__init__()
         
         self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1)
@@ -68,7 +68,7 @@ class ExpandingBlock(nn.Module):
         return x
 
 class UNet(nn.Module):
-    def __init__(self, in_channels, out_channels,mode='transpose',r='False'):
+    def __init__(self, in_channels, out_channels,mode='transpose',r=False):
         super(UNet, self).__init__()
         
         self.contract1 = ContractingBlock(in_channels, 64)
