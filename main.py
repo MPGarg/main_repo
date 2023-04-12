@@ -137,7 +137,6 @@ def train_unet(model, device, train_loader, optimizer, epoch, train_losses,crite
     for batch_idx, (data, target) in enumerate(pbar):
         # get samples
         data, target = data.to(device), target.to(device)
-        target = target.to(torch.float)
 
         # Init
         optimizer.zero_grad()
@@ -156,9 +155,9 @@ def train_unet(model, device, train_loader, optimizer, epoch, train_losses,crite
         loss.backward()
         optimizer.step() 
     
-    train_losses.append(train_loss/len(train_loader.dataset))
+    train_losses.append(train_loss)
 
-    print(f'\nAverage Training Loss={train_loss/len(train_loader.dataset)}')
+    print(f'\nAverage Training Loss={train_loss}')
 
 def test_unet(model, device, test_loader,test_losses,criterion):
     model.eval()
@@ -170,7 +169,7 @@ def test_unet(model, device, test_loader,test_losses,criterion):
             output = model(data)
             test_loss += criterion(output, target).item()  # sum up batch loss
 
-    test_loss /= len(test_loader.dataset)
+    #test_loss /= len(test_loader.dataset)
     test_losses.append(test_loss)
 
     print(f'Test set: Average loss={test_loss}')

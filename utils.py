@@ -361,11 +361,8 @@ class Oxford_Pet(torchvision.datasets.OxfordIIITPet):
         label = Image.open(labels)
 
         if self.transform is not None:
-            image, label = self.transforms(image, label)
-            single_mask = label.resize((128, 128))
-            single_mask = np.reshape(single_mask,(128,128,1))
-            single_mask = np.transpose(single_mask, (2, 0, 1))
-            label = single_mask
+            image, _= self.transforms(image, label)
+            label, _ = self.transforms(label, label)
 
         return image, label
 
