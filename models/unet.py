@@ -17,11 +17,11 @@ class ContractingBlock(nn.Module):
         
     def forward(self, x):
         x = self.conv1(x)
-        #x = self.bn1(x)
+        x = self.bn1(x)
         x = self.relu1(x)
         
         x = self.conv2(x)
-        #x = self.bn2(x)
+        x = self.bn2(x)
         x = self.relu2(x)
         
         skip = x  # store the output for the skip connection
@@ -54,13 +54,13 @@ class ExpandingBlock(nn.Module):
         x = torch.cat((x, skip), dim=1)
 
         x = self.conv1(x)
-        #x = self.bn1(x)
+        x = self.bn1(x)
 
         if self.r:
             x = self.relu1(x)
         
         x = self.conv2(x)
-        #x = self.bn2(x)
+        x = self.bn2(x)
 
         if self.r:
             x = self.relu2(x)        
