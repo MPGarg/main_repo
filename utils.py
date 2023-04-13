@@ -368,7 +368,7 @@ class Oxford_Pet(torchvision.datasets.OxfordIIITPet):
 
 def tl_ts_mod_unet(batch_size=64,transform_train=None):
     transform = transforms.Compose(
-      [transforms.Resize(size=(128,128)),
+      [transforms.Resize(size=(128,128),interpolation=transforms.InterpolationMode.NEAREST_EXACT),
        transforms.ToTensor()])
     trainset = Oxford_Pet(root='./data', split='trainval', target_types='segmentation', transform=transform, download=True)
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=2)
