@@ -162,7 +162,7 @@ def train_unet(model, device, train_loader, optimizer, epoch, train_losses,crite
     
     train_losses.append(train_loss)
 
-    print(f'\Training Loss={train_loss} Accuracy={correct}')
+    print(f'Training Loss={train_loss} Accuracy={correct}')
 
 def test_unet(model, device, test_loader,test_losses,criterion):
     model.eval()
@@ -189,9 +189,8 @@ def fit_model_unet(model, optimizer, criterion, trainloader, testloader, EPOCHS,
     test_losses = []
     
     for epoch in range(EPOCHS):
-        print("EPOCH: {} (LR: {})".format(epoch+1, optimizer.param_groups[0]['lr']))
+        print("\n EPOCH: {} (LR: {})".format(epoch+1, optimizer.param_groups[0]['lr']))
         train_unet(model, device, trainloader, optimizer, epoch, train_losses, criterion,scheduler)
-        #test_unet(model, device, testloader, test_losses, criterion)
 
     return model, train_losses, test_losses
 

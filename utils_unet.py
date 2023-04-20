@@ -59,7 +59,7 @@ def show_sample_unet(dataset):
         lbl = 'Ground Truth'
         ax.set_title(f'\n Label : {lbl}',fontsize=6) 
         ax.imshow(labels)
-        images, labels = next(dataiter)
+        images, labels, label_one = next(dataiter)
 
 def plot_acc_loss_unet(train_losses):
     fig, axs = plt.subplots(1,1,figsize=(10,5))
@@ -77,7 +77,7 @@ def show_sample_output_unet(model,loader,device,image_no=2):
 
     with torch.no_grad():
         index = 0
-        fig = plt.figure(figsize=(20,10))
+        fig = plt.figure(figsize=(10,10))
         for i in range(image_no):
             images, labels, label_one = next(dataiter)
             labels = labels.to(torch.float)
@@ -100,4 +100,4 @@ def show_sample_output_unet(model,loader,device,image_no=2):
             lbl = 'Predicted'
             ax.set_title(f'\n Label : {lbl}',fontsize=6)
             ax.imshow(predicted_masks[0])
-            images, labels = next(dataiter)
+            images, labels, label_one = next(dataiter)
