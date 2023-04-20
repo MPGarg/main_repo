@@ -133,10 +133,12 @@ def train_unet(model, device, train_loader, optimizer, epoch, train_losses,crite
     model.train()
     pbar = tqdm(train_loader)
     train_loss = 0
+    correct = 0
 
-    for batch_idx, (data, target) in enumerate(pbar):
+    for batch_idx, (data, target, label_one) in enumerate(pbar):
         # get samples
-        data, target = data.to(device), target.to(device)
+        label_one = label_one.type(torch.FloatTensor)
+        data, target, label_one = data.to(device), target.to(device), label_one.to(device)
 
         # Init
         optimizer.zero_grad()
@@ -147,9 +149,12 @@ def train_unet(model, device, train_loader, optimizer, epoch, train_losses,crite
         y_pred = model(data)
 
         # Calculate loss
-        loss = criterion(y_pred, target)
+        loss = criterion(y_pred, label_one)
 
         train_loss += loss.item()
+
+        pred = torch.argmax(y_pred, 1)
+        correct += torch.mean((pred == target).type(torch.float64))
 
         # Backpropagation
         loss.backward()
@@ -157,22 +162,26 @@ def train_unet(model, device, train_loader, optimizer, epoch, train_losses,crite
     
     train_losses.append(train_loss)
 
-    print(f'\nAverage Training Loss={train_loss}')
+    print(f'\Training Loss={train_loss} Accuracy={correct}')
 
 def test_unet(model, device, test_loader,test_losses,criterion):
     model.eval()
     test_loss = 0
+    correct = 0
 
     with torch.no_grad():
-        for data, target in test_loader:
-            data, target = data.to(device), target.to(device)
+        for data, target, label_one in test_loader:
+            label_one = label_one.type(torch.FloatTensor)
+            data, target, label_one = data.to(device), target.to(device), label_one.to(device)
             output = model(data)
             test_loss += criterion(output, target).item()  # sum up batch loss
+            pred = torch.argmax(output, 1)
+            correct += torch.mean((pred == target).type(torch.float64))
 
     #test_loss /= len(test_loader.dataset)
     test_losses.append(test_loss)
 
-    print(f'Test set: Average loss={test_loss}')
+    print(f'Test set: Average loss={test_loss} Accuracy={correct}')
     
 
 def fit_model_unet(model, optimizer, criterion, trainloader, testloader, EPOCHS, device,scheduler=None):
