@@ -128,7 +128,7 @@ def fit_model(model, optimizer, criterion, trainloader, testloader, EPOCHS, devi
     return model, wrong_prediction_list, right_prediction_list, train_losses, train_acc, test_losses, test_acc
 
 #Unet
-def train_unet(model, device, train_loader, optimizer, epoch, train_losses,criterion,scheduler):
+def train_unet(model, device, train_loader, optimizer, epoch, train_losses,criterion,scheduler,loss_cr='BCE'):
 
     model.train()
     pbar = tqdm(train_loader)
@@ -149,11 +149,18 @@ def train_unet(model, device, train_loader, optimizer, epoch, train_losses,crite
         y_pred = model(data)
 
         # Calculate loss
-        loss = criterion(y_pred, label_one)
+        if loss_cr == 'BCE':
+            loss = criterion(y_pred, label_one)
+        else:
+            loss = criterion(y_pred, target)
 
         train_loss += loss.item()
 
-        pred = torch.argmax(y_pred, 1)
+        if loss_cr == 'BCE':
+            pred = torch.argmax(y_pred, 1)
+        else:
+            _, pred = torch.max(y_pred, 1)
+
         correct += torch.mean((pred == target).type(torch.float64))
 
         # Backpropagation
@@ -184,13 +191,13 @@ def test_unet(model, device, test_loader,test_losses,criterion):
     print(f'Test set: Average loss={test_loss} Accuracy={correct}')
     
 
-def fit_model_unet(model, optimizer, criterion, trainloader, testloader, EPOCHS, device,scheduler=None):
+def fit_model_unet(model, optimizer, criterion, trainloader, testloader, EPOCHS, device,scheduler=None,loss_cr='BCE'):
     train_losses = []
     test_losses = []
     
     for epoch in range(EPOCHS):
         print("\n EPOCH: {} (LR: {})".format(epoch+1, optimizer.param_groups[0]['lr']))
-        train_unet(model, device, trainloader, optimizer, epoch, train_losses, criterion,scheduler)
+        train_unet(model, device, trainloader, optimizer, epoch, train_losses, criterion,scheduler,loss_cr=loss_cr)
 
     return model, train_losses, test_losses
 
