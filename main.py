@@ -247,13 +247,13 @@ def train_vae(model, device, train_loader, optimizer, epoch, train_losses,criter
     
     train_losses.append(train_loss/len(train_loader.dataset))
 
-    print(f'\nAverage Training Loss={train_loss/len(train_loader.dataset)}\n')
+    print(f'\nAverage Training Loss={train_loss/len(train_loader.dataset)}')
 
 def fit_model_vae(model, optimizer, criterion, trainloader, EPOCHS, device,scheduler=None):
     train_losses = []
     
     for epoch in range(EPOCHS):
-        print("\n EPOCH: {} (LR: {})".format(epoch+1, optimizer.param_groups[0]['lr']))
+        print("\nEPOCH: {} (LR: {})".format(epoch+1, optimizer.param_groups[0]['lr']))
         train_vae(model, device, trainloader, optimizer, epoch, train_losses, criterion,scheduler)
 
     return model, train_losses
