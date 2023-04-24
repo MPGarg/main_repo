@@ -215,3 +215,45 @@ def dice_loss(pred, target):
     dice = (2. * intersection + smooth) / (union + smooth)
     
     return 1 - dice   
+
+def train_vae(model, device, train_loader, optimizer, epoch, train_losses,criterion,scheduler):
+
+    model.train()
+    pbar = tqdm(train_loader)
+    train_loss = 0
+
+    for batch_idx, (data, target) in enumerate(pbar):
+        # get samples
+        data, target = data.to(device), target.to(device)
+
+        # Init
+        optimizer.zero_grad()
+        # In PyTorch, we need to set the gradients to zero before starting to do backpropragation because PyTorch accumulates the gradients on subsequent backward passes. 
+        # Because of this, when you start your training loop, ideally you should zero out the gradients so that you do the parameter update correctly.
+
+        # Predict
+        X_hat, mean, logvar = model(data,target)
+
+        # Calculate loss
+        reconstruction_loss = criterion(X_hat, data)
+        KL_divergence = 0.5 * torch.sum(-1 - logvar + torch.exp(logvar) + mean**2)
+        loss_tot = reconstruction_loss + KL_divergence
+
+        train_loss += loss_tot.item()
+
+        # Backpropagation
+        loss_tot.backward()
+        optimizer.step() 
+    
+    train_losses.append(train_loss/len(train_loader.dataset))
+
+    print(f'\nAverage Training Loss={train_loss/len(train_loader.dataset)}\n')
+
+def fit_model_vae(model, optimizer, criterion, trainloader, EPOCHS, device,scheduler=None):
+    train_losses = []
+    
+    for epoch in range(EPOCHS):
+        print("\n EPOCH: {} (LR: {})".format(epoch+1, optimizer.param_groups[0]['lr']))
+        train_vae(model, device, trainloader, optimizer, epoch, train_losses, criterion,scheduler)
+
+    return model, train_losses
